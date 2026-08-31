@@ -23,7 +23,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
         // 1. Allow CORS preflight requests (OPTIONS) to pass through untouched. 
         // (React will need this later to verify the connection).
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || request.getRequestURI().endsWith("/health")) {
             filterChain.doFilter(request, response);
             return;
         }
