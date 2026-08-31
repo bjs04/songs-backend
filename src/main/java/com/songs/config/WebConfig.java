@@ -13,16 +13,18 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
-    String[] origins = Arrays.stream(allowedOrigins.split(","))
-                                 .map(String::trim)
-                                 .toArray(String[]::new);
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        String rawOrigins = (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) 
+            ? allowedOrigins 
+            : "http://localhost:5173,https://songs-frontend-prod.vercel.app";
+        String[] origins = Arrays.stream(rawOrigins.split(","))
+                                 .map(String::trim)
+                                 .toArray(String[]::new);
         registry.addMapping("/**")
-                .allowedOrigins(origins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+            .allowedOriginPatterns(origins)
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true);
     }
 }

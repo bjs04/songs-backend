@@ -32,16 +32,19 @@ public class ApiKeyFilter extends OncePerRequestFilter {
         String providedApiKey = request.getHeader("X-API-KEY");
 
         // 3. Compare it securely
-        if (expectedApiKey.equals(providedApiKey)) {
-            // The keys match! Let the request through to the Controller
+        if (expectedApiKey != null && expectedApiKey.equals(providedApiKey)) {
+            // The keys match! Let the request through
             filterChain.doFilter(request, response);
         } else {
-            // Wrong or missing key. Block the request with a 401 Unauthorized status!
-            System.err.println("inside else block - Unauthorized access attempt: Invalid or missing API key.");
-            response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // or "*"
+            // Wrong or missing key - Set dynamic CORS header so browser displays 401 instead of CORS error
+            String origin = request.getHeader("Origin");
+            if (origin != null) {
+                response.setHeader("Access-Control-Allow-Origin", origin);
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+            }
             response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-KEY, Authorization");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
+            
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Unauthorized: Invalid or missing password. Please try again...");
         }
